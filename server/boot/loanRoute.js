@@ -1,4 +1,6 @@
+'use strict'
 module.exports = (app) => {
+    const CommonResponse = require('../util/CommonResponse')
     const loan = app.models.loan;
     const pack = app.models.pack;
     const host = app.models.host;
@@ -62,16 +64,21 @@ module.exports = (app) => {
                 else
                     console.log('pack3: ', pack3)
             })
-            res.json({ loan: loan })
+            var response = new CommonResponse("success", "create loan success", loan)
+            res.json(response)
         })
     })
     app.post('/api/loan/listLoan', (req, res) => {
         loan.find()
             .then(loans => {
-                res.json({list_loans: loans})
+                var response = new CommonResponse("success", "", loans)
+                console.log("response", response)
+                res.json(response)
             })
             .catch(err => {
-                res.json(err)
+                var response = new CommonResponse("error", "", err)
+                console.log("response", response)
+                res.json(response)
             })
     })
     app.post('/api/loan_host', (req, res) => {
@@ -85,8 +92,8 @@ module.exports = (app) => {
             })
             .then(host => {
                 console.log("host", host);
-                console.log("loan", loanTemp)
-                res.json({
+                console.log("loan", loanTemp);
+                var data = {
                     id: loanTemp.id,
                     name: loanTemp.name,
                     address: loanTemp.address,
@@ -95,10 +102,15 @@ module.exports = (app) => {
                     host_name: host.name,
                     host_address: host.address,
                     phone_number: host.phoneNumber
-                })
+                }
+                var response = new CommonResponse("success", "", data)
+                console.log("response", response)
+                res.json(response)
             })
             .catch(err => {
-                res.json(err)
+                var response = new CommonResponse("error", "", err)
+                console.log("response", response)
+                res.json(response)
             })
     })
     app.post('/api/loan/packages', (req, res) => {
@@ -110,17 +122,81 @@ module.exports = (app) => {
                 return loan.findById(loanId)
             })
             .then(loan => {
-                res.json({
+                var data = {
                     amount: loan.amount,
                     called: loan.called,
                     dueDate: loan.dueDate,
                     endDate: loan.endDate,
                     interest: loan.interest,
                     listPackages: packageTemp
-                })
+                }
+                var response = new CommonResponse("success", "", data)
+                console.log("response", response)
+                res.json(response)
             })
-            .catch(err=>{
-                res.json(err)
+            .catch(err => {
+                var response = new CommonResponse("error", "", err)
+                console.log("response", response)
+                res.json(response)
+            })
+    })
+    app.post('/api/loan/homestay', (req, res) => {
+        var loanTemp;
+        var id = req.body.id;
+        loan.findOne({ id: id })
+            .then(loan => {
+                loanTemp = loan;
+                return host.findOne(loan.hostId)
+            })
+            .then(host => {
+                var data = {
+                    homestay: {
+                        typeHome: loanTemp.typeHome,
+                        name: loanTemp.name,
+                        address: loanTemp.address,
+                        descriptions: loanTemp.descriptions,
+                        photos: loanTemp.photos,
+                        host_name: host.name,
+                        host_address: host.address,
+                        phoneNumber: host.phoneNumber
+                    }
+                }
+                var response = new CommonResponse("success", "", data)
+                console.log("response", response)
+                res.json(response)
+            })
+            .catch(err => {
+                var response = new CommonResponse("error", "", err)
+                console.log("response", response)
+                res.json(response)
+            })
+    })
+    app.post('/api/loan/fullInformation', (req, res) => {
+        var id = req.body.id;
+        var loanTemp, list_packages, homestay;
+        loan.findOne({ id: id })
+            .then(loan => {
+                loanTemp = loan;
+                return pack.find({ loanId: loanId });
+            })
+            .then(packages => {
+                list_packages = packages;
+                return host.findOne({ id: loanTemp.hostId })
+            })
+            .then(host => {
+                var data = {
+                    loan: loanTemp,
+                    list_packages: list_packages,
+                    host: host
+                }
+                var response = new CommonResponse("success", "", data)
+                console.log("response", response)
+                res.json(response)
+            })
+            .catch(err => {
+                var response = new CommonResponse("error", "", err)
+                console.log("response", response)
+                res.json(response)
             })
     })
 }

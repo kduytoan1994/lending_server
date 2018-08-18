@@ -10,7 +10,15 @@
       "type": "string",
       "required": true
     },
+    "avatar": {
+      "type": "string",
+      "required": false
+    },
     "phoneNumber": {
+      "type": "string",
+      "required": false
+    },
+    "lended_money": {
       "type": "string",
       "required": false
     },
